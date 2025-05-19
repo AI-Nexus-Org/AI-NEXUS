@@ -1,0 +1,6 @@
+.env
+node_modules
+bin
+rhubarb
+.DS_Store
+audios/message_*
