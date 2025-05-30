@@ -17,11 +17,11 @@ export const ConversationHistory = () => {
   };
 
   return (
-    <div className="fixed bottom-20 right-4 z-20 pointer-events-auto">
+    <div className="fixed bottom-20 left-4 z-20 pointer-events-auto">
       {/* Toggle button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="bg-pink-500 hover:bg-pink-600 text-white p-3 rounded-full shadow-lg mb-2 ml-auto block"
+        className="bg-pink-500 hover:bg-pink-600 text-white p-3 rounded-full shadow-lg mb-2 mr-auto block"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
