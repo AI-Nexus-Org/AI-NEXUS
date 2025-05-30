@@ -1,6 +1,6 @@
 
 
-# 3D AI Character Chat Application
+# AI-NEXUS: 3D AI Character Chat Application
 
 A web application that leverages 3D AI characters to provide interactive text and voice responses to user questions. The application consists of a React frontend and Node.js backend with OpenAI and ElevenLabs integration for AI responses and voice synthesis.
 
