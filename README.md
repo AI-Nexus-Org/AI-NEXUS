@@ -27,8 +27,8 @@ Before you begin, ensure you have the following:
 
 1. Clone the repository:
    ```bash
-   git clone [your-repository-url]
-   cd [repository-name]
+   git clone https://github.com/AI-Nexus-Org/AI-NEXUS.git
+   cd AI-NEXUS
    ```
 
 2. Install frontend dependencies:
@@ -46,7 +46,7 @@ Before you begin, ensure you have the following:
 
 ## Configuration
 
-1. Create a `.env` file in the root directory based on the `.env.example`:
+1. Create a `.env` file in the backend in the root directory based on the `.env.example`:
    ```env
    OPENAI_API_KEY=your-openai-api-key
    ELEVEN_LABS_API_KEY=your-eleven-labs-api-key
