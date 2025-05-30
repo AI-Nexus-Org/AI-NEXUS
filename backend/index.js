@@ -3,7 +3,8 @@ import cors from "cors";
 import dotenv from "dotenv";
 import voice from "elevenlabs-node";
 import express from "express";
-import { promises as fs } from "fs";
+import fs from "fs";
+import { promises as fsPromises } from "fs";
 import OpenAI from "openai";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -21,7 +22,7 @@ const rhubarbPath = path.resolve(__dirname,process.env.RhubarbPath);  // For rhu
 // Helper functions with error handling
 const readJsonTranscript = async (file) => {
   try {
-    const data = await fs.readFile(file, "utf8");
+    const data = await fsPromises.readFile(file, "utf8");
     return JSON.parse(data);
   } catch (err) {
     console.error(`Error reading JSON file ${file}:`, err);
@@ -31,7 +32,7 @@ const readJsonTranscript = async (file) => {
 
 const audioFileToBase64 = async (file) => {
   try {
-    const data = await fs.readFile(file);
+    const data = await fsPromises.readFile(file);
     return data.toString("base64");
   } catch (err) {
     console.error(`Error reading audio file ${file}:`, err);
@@ -53,7 +54,7 @@ const port = 3000;
 // Create audios directory if it doesn't exist
 (async () => {
   try {
-    await fs.mkdir('audios', { recursive: true });
+    await fsPromises.mkdir('audios', { recursive: true });
   } catch (err) {
     console.error('Could not create audios directory:', err);
   }
@@ -129,6 +130,53 @@ const lipSyncMessage = async (messageIndex) => {
     throw new Error('Lip sync processing failed');
   }
 };
+
+// Speech-to-text endpoint to handle voice recordings
+app.post("/speech-to-text", async (req, res) => {
+  try {
+    const { audioData } = req.body;
+    
+    if (!audioData) {
+      return res.status(400).send({ error: "No audio data provided" });
+    }
+    
+    // Convert base64 audio to buffer
+    const base64Data = audioData.split(',')[1]; // Remove the data URL prefix
+    const audioBuffer = Buffer.from(base64Data, 'base64');
+    
+    // Save audio temporarily with the correct extension (.mp3 or .webm)
+    const tempAudioPath = path.join(__dirname, 'audios', `speech_${Date.now()}.mp3`);
+    await fsPromises.writeFile(tempAudioPath, audioBuffer);
+    
+    console.log(`Audio saved to ${tempAudioPath}, preparing for transcription...`);
+    
+    try {
+      // Use OpenAI's Whisper API for speech recognition with the proper file
+      const transcription = await openai.audio.transcriptions.create({
+        file: fs.createReadStream(tempAudioPath),
+        model: "whisper-1",
+      });
+      
+      console.log("Transcription successful:", transcription.text);
+      
+      // Clean up the temporary file
+      await fsPromises.unlink(tempAudioPath).catch(err => {
+        console.error("Error deleting temporary audio file:", err);
+      });
+      
+      return res.send({ text: transcription.text });
+    } catch (err) {
+      console.error("OpenAI Whisper API error:", err);
+      throw new Error("Failed to transcribe audio");
+    }
+  } catch (error) {
+    console.error("Error in /speech-to-text endpoint:", error);
+    res.status(500).send({
+      error: "An error occurred while processing your audio",
+      details: error.message
+    });
+  }
+});
 
 app.post("/chat", async (req, res) => {
   try {
